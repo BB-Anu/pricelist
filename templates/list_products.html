@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product List</title>
+    <script>
+        function filterProducts() {
+            let company = document.getElementById("companyFilter").value;
+            let composition = document.getElementById("compositionFilter").value;
+            let sortBy = document.getElementById("sortBy").value;
+
+            let url = `/list-products/?company=${company}&composition=${composition}&sort=${sortBy}`;
+            window.location.href = url;
+        }
+    </script>
+</head>
+<body>
+    <h2>Product List</h2>
+
+    <!-- Filter Options -->
+    <div>
+        <label>Company:</label>
+        <input type="text" id="companyFilter" placeholder="Enter company name" value="{{ selected_company|default:'' }}">
+        
+        <label>Composition:</label>
+        <input type="text" id="compositionFilter" placeholder="Enter composition" value="{{ selected_composition|default:'' }}">
+
+        <label>Sort By:</label>
+        <select id="sortBy">
+            <option value="company" {% if selected_sort == "company" %}selected{% endif %}>Company</option>
+            <option value="product" {% if selected_sort == "product" %}selected{% endif %}>Product</option>
+            <option value="composition" {% if selected_sort == "composition" %}selected{% endif %}>Composition</option>
+        </select>
+        
+        <button onclick="filterProducts()">Filter</button>
+    </div>
+
+    <table border="1">
+        <thead>
+            <tr>
+                <th>Company</th>
+                <th>Product</th>
+                <th>Composition</th>
+                <th>Packing</th>
+                <th>MRP</th>
+                <th>Rate</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for product in products %}
+            <tr>
+                <td>{{ product.company }}</td>
+                <td>{{ product.product }}</td>
+                <td>{{ product.composition }}</td>
+                <td>{{ product.packing }}</td>
+                <td>{{ product.mrp }}</td>
+                <td>{{ product.rate }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <!-- Pagination -->
+    <div>
+        {% if products.has_previous %}
+            <a href="?company={{ selected_company }}&composition={{ selected_composition }}&sort={{ selected_sort }}&page=1">First</a>
+            <a href="?company={{ selected_company }}&composition={{ selected_composition }}&sort={{ selected_sort }}&page={{ products.previous_page_number }}">Previous</a>
+        {% endif %}
+
+        <span>Page {{ products.number }} of {{ total_pages }}</span>
+
+        {% if products.has_next %}
+            <a href="?company={{ selected_company }}&composition={{ selected_composition }}&sort={{ selected_sort }}&page={{ products.next_page_number }}">Next</a>
+            <a href="?company={{ selected_company }}&composition={{ selected_composition }}&sort={{ selected_sort }}&page={{ total_pages }}">Last</a>
+        {% endif %}
+    </div>
+
+    <script>
+        function filterProducts() {
+            let company = document.getElementById("companyFilter").value.trim();
+            let composition = document.getElementById("compositionFilter").value.trim();
+            let sortBy = document.getElementById("sortBy").value;
+    
+            let url = new URL(window.location.origin + "/list-products/");
+            let params = new URLSearchParams();
+    
+            if (company) params.append("company", company);
+            if (composition) params.append("composition", composition);
+            if (sortBy) params.append("sort", sortBy);
+    
+            window.location.href = url + "?" + params.toString();
+        }
+    </script>
+    </body>
+</html>
